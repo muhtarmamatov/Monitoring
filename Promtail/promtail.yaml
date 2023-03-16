@@ -1,0 +1,37 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: integration_service_access_log
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: integration_service_access_log
+          __path__: /var/log/test/iapi*-access.log.1
+    pipeline_stages:
+      - match:
+          selector: '{job="integration_service_access_log"}'
+          stages:
+            - regex:
+                expression: (?P<url>"GET|POST [^? ]+)(?P<url_params>\?[^\s]*)?.*resp_time:(?P<resp_time>-?\d+\.\d+)
+            - labels:
+                url:
+                url_params:
+                resp_time:
+
+
+
+
+
+
+
+
+                
